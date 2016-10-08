@@ -3,19 +3,19 @@
 // these wrappers don't seem to be built in yet
 void ansicolor(Closure<Void> wrapped) {
   wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm', 'defaultFg': 1, 'defaultBg': 2]) {
-    wrapped()
+    wrapped.call()
   }
 }
 void xvfb(Closure<Void> wrapped) {
   wrap([$class: 'Xvfb']) {
-    wrapped()
+    wrapped.call()
   }
 }
 
 void withPorts(Closure<Void> wrapped) {
   def ports = sh(script: 'etc/scripts/allocate-jboss-ports', returnStdout: true)
   withEnv(ports.trim().readLines()) {
-    wrapped()
+    wrapped.call()
   }
 }
 
