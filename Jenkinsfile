@@ -23,11 +23,28 @@ void printNode() {
   println "running on node ${env.NODE_NAME}"
 }
 
+def notifyStarted() {
+  hipchatSend color: "GRAY", notify: true, message: "STARTED: Job <a href=\"${env.BUILD_URL}\">${env.JOB_NAME} #${env.BUILD_NUMBER}</a>"
+}
+
+// def notifyPassed(appserver) {
+//   hipchatSend color: "GRAY", notify: true, message: "TESTS PASSED ($appserver): Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
+// }
+
+// def notifySuccessful() {
+//   hipchatSend color: "GREEN", notify: true, message: "SUCCESSFUL: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
+// }
+
+// def notifyFailed() {
+//   hipchatSend color: "RED", notify: true, message: "FAILED: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
+// }
+
 timestamps {
   node {
     ansicolor {
       stage('Checkout') {
         printNode()
+        notifyStarted()
         // Checkout code from repository
         checkout scm
       }
@@ -71,6 +88,9 @@ timestamps {
 // TODO remove -DexcludeFrontend (just for faster testing)
 
 // TODO build zanata-test-war but don't run functional tests (need to modify zanata-test-war pom)
+
+        // TODO run unit tests too
+        // TODO notify if compile+unit test successful
 
         archiveArtifacts '**/target/*.war'
 //        archiveArtifacts '**/target/*.jar, **/target/*.war'
