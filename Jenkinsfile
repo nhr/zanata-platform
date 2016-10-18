@@ -20,6 +20,8 @@ void withPorts(Closure<Void> wrapped) {
 }
 
 void printNode() {
+  sh "env"
+  sh "which chromedriver"
   println "running on node ${env.NODE_NAME}"
 }
 
