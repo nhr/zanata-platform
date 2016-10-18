@@ -93,8 +93,8 @@ timestamps {
 
         // TODO notify if compile+unit test successful
 
-        archiveArtifacts '**/target/*.war'
-//        archiveArtifacts '**/target/*.jar, **/target/*.war'
+        archive '**/target/*.war'
+//        archive '**/target/*.jar, **/target/*.war'
       }
 
       stage('stash') {
@@ -141,9 +141,7 @@ def archiveTestResultsIfUnstable() {
         excludes: '**/BACKUP-*.log')
   }
 }
-def archiveArtifacts(pattern) {
-  archive artifacts: pattern, fingerprint: true, onlyIfSuccessful: true
-}
+
 def integrationTests(def appserver) {
   xvfb {
     withPorts {
