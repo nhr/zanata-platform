@@ -63,8 +63,7 @@ timestamps {
         sh "./mvnw --version"
       }
 
-      // TODO build and archive binaries without tests, then in parallel, unarchive and run:
-      //   unit tests
+      // TODO build and archive binaries with unit tests, then in parallel, unarchive and run:
       //   arquillian tests
       //   eap, wildfly functional tests
       //   mysql 5.6, functional tests (on wildfly)
@@ -77,10 +76,9 @@ timestamps {
                      --batch-mode \
                      --settings .travis-settings.xml \
                      --update-snapshots \
-                     -DstaticAnalysis=false \
-                     -Dcheckstyle.skip \
+                     -Dmaven.test.failure.ignore \
+                     -DstaticAnalysis \
                      -Dchromefirefox \
-                     -DskipTests \
                      -DskipFuncTests \
                      -DskipArqTests \
 -DexcludeFrontend \
@@ -89,7 +87,10 @@ timestamps {
 
 // TODO build zanata-test-war but don't run functional tests (need to modify zanata-test-war pom)
 
-        // TODO run unit tests too
+        def testFiles = '**/target/surefire-reports/TEST-*.xml'
+        setJUnitPrefix("UNIT", testFiles)
+        junit testFiles
+
         // TODO notify if compile+unit test successful
 
         archiveArtifacts '**/target/*.war'
@@ -103,33 +104,7 @@ timestamps {
   }
 
   stage('Parallel tests') {
-    printNode()
     def tasks = [:]
-    tasks['Unit tests'] = {
-      node {
-        ansicolor {
-          unstash 'workspace'
-          printNode()
-          sh """./mvnw test \
-                       -pl zanata-war -am \
-                       --batch-mode \
-                       --settings .travis-settings.xml \
-                       -DstaticAnalysis=true \
-                       -Dcheckstyle.skip=false \
-                       -Dmaven.test.failure.ignore \
-                       -Dmaven.main.skip \
-                       -Dgwt.compiler.skip \
-                       -Dmaven.war.skip \
-                       -DskipFuncTests \
-                       -DskipArqTests \
--DexcludeFrontend \
-          """
-          def testFiles = '**/target/surefire-reports/TEST-*.xml'
-          setJUnitPrefix("UNIT", testFiles)
-          junit testFiles
-        }
-      }
-    }
     tasks['Integration tests: wildfly'] = {
       node {
         ansicolor {
