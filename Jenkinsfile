@@ -152,13 +152,14 @@ def integrationTests(def appserver) {
                    -DstaticAnalysis=false \
                    -Dcheckstyle.skip \
                    -Dappserver=$appserver \
-                   -DallFuncTests \
                    -Dmaven.test.failure.ignore \
                    -Dmaven.main.skip \
                    -Dgwt.compiler.skip \
                    -Dmaven.war.skip \
 -DexcludeFrontend \
       """
+// FIXME put this back
+//                   -DallFuncTests \
       // -Dmaven.war.skip (but we might need zanata-test-war)
 
       // TODO might need some or all of these:
