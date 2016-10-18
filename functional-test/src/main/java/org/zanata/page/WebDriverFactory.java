@@ -77,7 +77,6 @@ import static org.zanata.util.Constants.zanataInstance;
 public enum WebDriverFactory {
     INSTANCE;
 
-    private static final Logger LOG = LoggerFactory.getLogger(WebDriverFactory.class);
     private static final ThreadLocal<SimpleDateFormat> TIME_FORMAT =
             new ThreadLocal<SimpleDateFormat>() {
                 @Override
@@ -107,6 +106,11 @@ public enum WebDriverFactory {
 
     @Nullable
     private WebDriverEventListener logListener;
+
+    // we can't declare this as a field because it is needed during init
+    private static final Logger log() {
+        return LoggerFactory.getLogger(WebDriverFactory.class);
+    }
 
     public WebDriver getDriver() {
         return driver;
@@ -333,7 +337,7 @@ public enum WebDriverFactory {
         DesiredCapabilities capabilities = DesiredCapabilities.chrome();
         String chromeBin = PropertiesHolder.properties
                 .getProperty("webdriver.chrome.bin");
-        LOG.info("Setting chrome.binary: {}", chromeBin);
+        log().info("Setting chrome.binary: {}", chromeBin);
         capabilities.setCapability("chrome.binary", chromeBin);
 
         ChromeOptions options = new ChromeOptions();
@@ -341,7 +345,7 @@ public enum WebDriverFactory {
         assert url != null : "can't find extension (check testResource config in pom.xml)";
         String extensionDir = new File(url.getPath()).getParentFile().getAbsolutePath();
         options.addArguments("load-extension=" + extensionDir);
-        LOG.info("Adding Chrome extension: {}", extensionDir);
+        log().info("Adding Chrome extension: {}", extensionDir);
         capabilities.setCapability(ChromeOptions.CAPABILITY, options);
 
         enableLogging(capabilities);
@@ -361,7 +365,7 @@ public enum WebDriverFactory {
                 }, 0));
         Proxy seleniumProxy = ClientUtil.createSeleniumProxy(proxy);
         capabilities.setCapability(CapabilityType.PROXY, seleniumProxy);
-        LOG.info("Setting proxy: {}", seleniumProxy.getHttpProxy());
+        log().info("Setting proxy: {}", seleniumProxy.getHttpProxy());
         try {
             driverService.start();
         } catch (IOException e) {
