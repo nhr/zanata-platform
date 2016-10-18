@@ -77,6 +77,7 @@ import static org.zanata.util.Constants.zanataInstance;
 public enum WebDriverFactory {
     INSTANCE;
 
+    private static final Logger LOG = LoggerFactory.getLogger(WebDriverFactory.class);
     private static final ThreadLocal<SimpleDateFormat> TIME_FORMAT =
             new ThreadLocal<SimpleDateFormat>() {
                 @Override
@@ -330,14 +331,17 @@ public enum WebDriverFactory {
                 PropertiesHolder.getProperty("webdriver.log"));
         driverService = ChromeDriverService.createDefaultService();
         DesiredCapabilities capabilities = DesiredCapabilities.chrome();
-        capabilities.setCapability("chrome.binary", PropertiesHolder.properties
-                        .getProperty("webdriver.chrome.bin"));
+        String chromeBin = PropertiesHolder.properties
+                .getProperty("webdriver.chrome.bin");
+        LOG.info("Setting chrome.binary: {}", chromeBin);
+        capabilities.setCapability("chrome.binary", chromeBin);
 
         ChromeOptions options = new ChromeOptions();
         URL url = Thread.currentThread().getContextClassLoader().getResource("zanata-testing-extension/chrome/manifest.json");
         assert url != null : "can't find extension (check testResource config in pom.xml)";
-        File file = new File(url.getPath()).getParentFile();
-        options.addArguments("load-extension=" + file.getAbsolutePath());
+        String extensionDir = new File(url.getPath()).getParentFile().getAbsolutePath();
+        options.addArguments("load-extension=" + extensionDir);
+        LOG.info("Adding Chrome extension: {}", extensionDir);
         capabilities.setCapability(ChromeOptions.CAPABILITY, options);
 
         enableLogging(capabilities);
@@ -357,6 +361,7 @@ public enum WebDriverFactory {
                 }, 0));
         Proxy seleniumProxy = ClientUtil.createSeleniumProxy(proxy);
         capabilities.setCapability(CapabilityType.PROXY, seleniumProxy);
+        LOG.info("Setting proxy: {}", seleniumProxy.getHttpProxy());
         try {
             driverService.start();
         } catch (IOException e) {
