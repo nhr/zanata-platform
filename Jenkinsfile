@@ -48,7 +48,20 @@ timestamps {
         printNode()
         notifyStarted()
         // Checkout code from repository
-        checkout scm
+        // Based on https://issues.jenkins-ci.org/browse/JENKINS-33022?focusedCommentId=248530&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-248530
+        // This should be equivalent to checkout scm (noTags: true, shallow: true)
+
+        // TODO use reference repo instead of shallow clone
+        // see https://issues.jenkins-ci.org/browse/JENKINS-33273?focusedCommentId=268631&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-268631
+        // and https://issues.jenkins-ci.org/browse/JENKINS-33273?focusedCommentId=273644&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-273644
+        checkout([
+          $class: 'GitSCM',
+          branches: scm.branches,
+          doGenerateSubmoduleConfigurations: scm.doGenerateSubmoduleConfigurations,
+          extensions: scm.extensions + [[$class: 'CloneOption', noTags: true, reference: '', shallow: true]],
+          submoduleCfg: [],
+          userRemoteConfigs: scm.userRemoteConfigs
+        ])
       }
 
       stage('Install build tools') {
