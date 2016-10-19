@@ -29,17 +29,23 @@ def notifyStarted() {
   hipchatSend color: "GRAY", notify: true, message: "STARTED: Job <a href=\"${env.BUILD_URL}\">${env.JOB_NAME} #${env.BUILD_NUMBER}</a>"
 }
 
-// def notifyPassed(appserver) {
-//   hipchatSend color: "GRAY", notify: true, message: "TESTS PASSED ($appserver): Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
-// }
+def notifyTestResults(def testType) {
+  // if tests have failed currentBuild.result will be 'UNSTABLE'
+  if (currentBuild.result != null) {
+    hipchatSend color: "YELLOW", notify: true, message: "TESTS FAILED ($testType): Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
+  } else {
+    hipchatSend color: "GREEN", notify: true, message: "TESTS PASSED ($testType): Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
+  }
+}
 
-// def notifySuccessful() {
-//   hipchatSend color: "GREEN", notify: true, message: "SUCCESSFUL: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
-// }
+def notifySuccessful() {
+  hipchatSend color: "GRAY", notify: true, message: "SUCCESSFUL: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
+}
 
-// def notifyFailed() {
-//   hipchatSend color: "RED", notify: true, message: "FAILED: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
-// }
+// TODO try-catch build exception and call this:
+def notifyFailed() {
+  hipchatSend color: "RED", notify: true, message: "FAILED: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
+}
 
 timestamps {
   node {
@@ -106,7 +112,9 @@ timestamps {
         setJUnitPrefix("UNIT", testFiles)
         junit testFiles
 
-        // TODO notify if compile+unit test successful
+        // notify if compile+unit test successful
+
+        notifyTestResults("UNIT")
 
         archive '**/target/*.war'
 //        archive '**/target/*.jar, **/target/*.war'
@@ -120,7 +128,7 @@ timestamps {
 
   stage('Parallel tests') {
     def tasks = [:]
-    tasks['Integration tests: wildfly'] = {
+    tasks['Integration tests: WILDFLY'] = {
       node {
         ansicolor {
           unstash 'workspace'
@@ -129,7 +137,7 @@ timestamps {
         }
       }
     }
-    tasks['Integration tests: jbosseap'] = {
+    tasks['Integration tests: JBOSSEAP'] = {
       node {
         ansicolor {
           unstash 'workspace'
@@ -146,6 +154,7 @@ timestamps {
   // http://stackoverflow.com/a/39535424/14379
   // IRC: https://issues.jenkins-ci.org/browse/JENKINS-33922
   // possible alternatives: Slack, HipChat, RocketChat, Telegram?
+  notifySuccessful()
 }
 
 def archiveTestResultsIfUnstable() {
@@ -170,24 +179,25 @@ def integrationTests(def appserver) {
                    -Dmaven.test.failure.ignore \
                    -Dmaven.main.skip \
                    -Dgwt.compiler.skip \
-                   -Dmaven.war.skip \
+                   -Dwebdriver.display=$DISPLAY
+                   -Dcargo.debug.jvm.args=
+                   -Dwebdriver.type=chrome
+                   -Dwebdriver.chrome.driver=/opt/chromedriver
 -DexcludeFrontend \
       """
 // FIXME put this back
 //                   -DallFuncTests \
-      // -Dmaven.war.skip (but we might need zanata-test-war)
-
-      // TODO might need some or all of these:
+      // TODO add -Dmaven.war.skip (but we need zanata-test-war)
       // -Dfunctional-test - probably obsolete
-      // -Dwebdriver.display=$DISPLAY
-      // -Dcargo.debug.jvm.args= -Dwebdriver.type=chrome -Dwebdriver.chrome.driver=/opt/chromedriver
 
+      // TODO try to remove webdriver.display cargo.debug.jvm.args webdriver*
     }
   }
   def testFiles = '**/target/failsafe-reports/TEST-*.xml'
   setJUnitPrefix(appserver.toUpperCase(), testFiles)
   junit testFiles
   archiveTestResultsIfUnstable()
+  notifyTestResults(appserver.toUpperCase())
 }
 
 // from https://issues.jenkins-ci.org/browse/JENKINS-27395?focusedCommentId=256459&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-256459
