@@ -182,7 +182,7 @@ def integrationTests(def appserver) {
                    -Dmaven.test.failure.ignore \
                    -Dmaven.main.skip \
                    -Dgwt.compiler.skip \
-                   -Dwebdriver.display=$DISPLAY
+                   -Dwebdriver.display=${env.DISPLAY}
                    -Dcargo.debug.jvm.args=
                    -Dwebdriver.type=chrome
                    -Dwebdriver.chrome.driver=/opt/chromedriver
