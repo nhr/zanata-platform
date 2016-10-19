@@ -60,14 +60,17 @@ timestamps {
         // TODO use reference repo instead of shallow clone
         // see https://issues.jenkins-ci.org/browse/JENKINS-33273?focusedCommentId=268631&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-268631
         // and https://issues.jenkins-ci.org/browse/JENKINS-33273?focusedCommentId=273644&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-273644
-        checkout([
-          $class: 'GitSCM',
-          branches: scm.branches,
-          doGenerateSubmoduleConfigurations: scm.doGenerateSubmoduleConfigurations,
-          extensions: scm.extensions + [[$class: 'CloneOption', noTags: true, reference: '', shallow: true]],
-          submoduleCfg: [],
-          userRemoteConfigs: scm.userRemoteConfigs
-        ])
+
+        // this doesn't work on RHEL 7: https://issues.jenkins-ci.org/browse/JENKINS-37229
+        // checkout([
+        //   $class: 'GitSCM',
+        //   branches: scm.branches,
+        //   doGenerateSubmoduleConfigurations: scm.doGenerateSubmoduleConfigurations,
+        //   extensions: scm.extensions + [[$class: 'CloneOption', noTags: true, reference: '', shallow: true]],
+        //   submoduleCfg: [],
+        //   userRemoteConfigs: scm.userRemoteConfigs
+        // ])
+        checkout scm
       }
 
       stage('Install build tools') {
