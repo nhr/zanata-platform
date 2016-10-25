@@ -44,13 +44,16 @@
     <!-- Editor path within the jar to put the built artifacts.
         Note: META-INF/resources/* is served as static content, so this puts
               the editor at http://<server>/app -->
-    <editor.bundle.destination>${bundle.dest}/app</editor.bundle.destination>
+    <editor.bundle.destination>${bundle.dest}/editor</editor.bundle.destination>
 
     <!-- Directory that contains the actual built frontend app (index, script and styles) -->
     <frontend.built.artifact.directory>${frontend.build.directory}/dist</frontend.built.artifact.directory>
 
     <!-- Directory that contains the actual built editor app (index, script and styles) -->
     <editor.built.artifact.directory>${editor.build.directory}/app/dist</editor.built.artifact.directory>
+
+    <!-- Do not run checkstyle (eslint is used instead for this module) -->
+    <checkstyle.skip>true</checkstyle.skip>
   </properties>
 
   <dependencies>
@@ -147,23 +150,6 @@
                 <argument>install</argument>
                 <argument>--cache-min</argument>
                 <argument>${npm.cache.min}</argument>
-              </arguments>
-            </configuration>
-          </execution>
-
-          <!-- editor: copy index.html to build directory. -->
-          <execution>
-            <id>editor: npm run processhtml</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <workingDirectory>${editor.build.directory}</workingDirectory>
-              <arguments>
-                <argument>${npm.executable}</argument>
-                <argument>run</argument>
-                <argument>processhtml</argument>
               </arguments>
             </configuration>
           </execution>
@@ -283,7 +269,6 @@
               <resources>
                 <resource>
                   <directory>${editor.built.artifact.directory}</directory>
-                  <include>index.html</include>
                   <include>bundle.js</include>
                   <include>bundle.js.map</include>
                   <include>bundle.css</include>

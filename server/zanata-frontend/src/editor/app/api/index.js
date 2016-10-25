@@ -15,10 +15,9 @@ import {
 } from '../utils/status'
 
 // FIXME use value from config
-const appPath = 'app'
+const appPath = 'editor'
 export const serviceUrl = getServiceUrl()
 export const dashboardUrl = serviceUrl + '/dashboard'
-
 export const baseRestUrl = serviceUrl + '/rest'
 
 /**
@@ -35,7 +34,7 @@ export const baseRestUrl = serviceUrl + '/rest'
 function getServiceUrl () {
   const isDev = process.env && process.env.NODE_ENV === 'development'
   if (isDev) {
-    return 'http://localhost:7878/zanata'
+    return 'http://localhost:8080/zanata'
   } else {
     let serviceUrl = location.origin + location.pathname
     const index = location.href.indexOf(appPath)
