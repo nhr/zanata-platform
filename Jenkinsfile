@@ -96,7 +96,7 @@ timestamps {
 
       stage('Build') {
         printNode()
-        sh """./mvnw clean package \
+        sh """./run-clean.sh mvnw clean package \
                      --batch-mode \
                      --settings .travis-settings.xml \
                      --update-snapshots \
@@ -173,7 +173,7 @@ def integrationTests(def appserver) {
   xvfb {
     withPorts {
       // Run the maven build
-      sh """./mvnw verify \
+      sh """./run-clean.sh ./mvnw verify \
                    --batch-mode \
                    --settings .travis-settings.xml \
                    -DstaticAnalysis=false \
